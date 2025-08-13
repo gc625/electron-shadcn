@@ -29,6 +29,13 @@ export default function NavigationMenu() {
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
+        <NavigationMenuItem>
+          <Link to="/third-page">
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              {t("titleThirdPage")}
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenuBase>
   );
