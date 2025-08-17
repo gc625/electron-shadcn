@@ -1,0 +1,1 @@
+export const GEMINI_SUBMIT_MESSAGE_CHANNEL = "gemini:submit-message";

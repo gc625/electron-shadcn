@@ -8,6 +8,11 @@ import {
 
 export function exposeThemeContext() {
   const { contextBridge, ipcRenderer } = window.require("electron");
+  // same thing as 
+  // const electronModule = window.require("electron");
+  // const contextBridge = electronModule.contextBridge;
+  // const ipcRenderer = electronModule.ipcRenderer;
+
   contextBridge.exposeInMainWorld("themeMode", {
     current: () => ipcRenderer.invoke(THEME_MODE_CURRENT_CHANNEL),
     toggle: () => ipcRenderer.invoke(THEME_MODE_TOGGLE_CHANNEL),

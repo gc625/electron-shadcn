@@ -18,7 +18,14 @@ interface ElectronWindow {
   close: () => Promise<void>;
 }
 
+interface GeminiContext {
+  submit: (message: string) => Promise<string>;
+}
+
+
+
 declare interface Window {
   themeMode: ThemeModeContext;
   electronWindow: ElectronWindow;
+  gemini: GeminiContext;
 }
