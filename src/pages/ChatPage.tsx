@@ -74,28 +74,28 @@ export default function ChatPage() {
 
   
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 min-h-0">
-          {/* Show suggestions when no messages */}
-          {messages.length === 0 ? (
-            <PromptSuggestions
-              label="Try these prompts ✨"
-              append={append}
-              suggestions={[
-                "What is the weather in San Francisco?",
-                "Explain step-by-step how to solve this math problem: If x² + 6x + 9 = 25, what is x?",
-                "Design a simple algorithm to find the longest palindrome in a string.",
-              ]}
-            />
-          ) : (
-            <ChatMessages messages={messages}>
-              <MessageList 
-                messages={messages} 
-                isTyping={isLoading}
-              />
-            </ChatMessages>
-          )}
-      </div>
+  <div className="flex flex-col h-full">
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      {messages.length === 0 ? (
+        <PromptSuggestions
+          label="Try these prompts ✨"
+          append={append}
+          suggestions={[
+            "What is the weather in San Francisco?",
+            "Explain step-by-step how to solve this math problem: If x² + 6x + 9 = 25, what is x?",
+            "Design a simple algorithm to find the longest palindrome in a string.",
+          ]}
+        />
+      ) : (
+        <div className="pb-4">
+          <MessageList 
+            messages={messages} 
+            isTyping={isLoading}
+          />
+        </div>
+      )}
+    </div>
+      
       <div>
           <ChatForm className="mt-auto"
           isPending={isLoading}
@@ -109,6 +109,7 @@ export default function ChatPage() {
               setFiles={setFiles}
               stop={() => setIsLoading(false)}
               isGenerating={isLoading}
+              className="messagel-input"
             />
           )}
 
