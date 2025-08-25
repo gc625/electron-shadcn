@@ -4,6 +4,7 @@ import WelcomePage from "../pages/WelcomePage";
 import SecondPage from "@/pages/SecondPage";
 import ThirdPage from "@/pages/ThirdPage";
 import ChatPage from "@/pages/ChatPage"; 
+import OverlayPage  from "@/pages/OverlayPage";
 // TODO: Steps to add a new route:
 // 1. Create a new page component in the '../pages/' directory (e.g., NewPage.tsx)
 // 2. Import the new page component at the top of this file
@@ -47,4 +48,11 @@ export const ChatPageRoute = createRoute({
   component: ChatPage,
 });
 
-export const rootTree = RootRoute.addChildren([HomeRoute, SecondPageRoute, ThirdPageRoute, ChatPageRoute]);
+export const OverlayPageRoute = createRoute({
+  getParentRoute: () => RootRoute,
+  path: "/overlay",
+  component: OverlayPage,
+});
+
+
+export const rootTree = RootRoute.addChildren([HomeRoute, SecondPageRoute, ThirdPageRoute, ChatPageRoute, OverlayPageRoute]);

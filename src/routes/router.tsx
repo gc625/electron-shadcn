@@ -1,4 +1,4 @@
-import { createMemoryHistory, createRouter } from "@tanstack/react-router";
+import { createHashHistory, createMemoryHistory, createRouter } from "@tanstack/react-router";
 import { rootTree } from "./routes";
 
 declare module "@tanstack/react-router" {
@@ -7,7 +7,8 @@ declare module "@tanstack/react-router" {
   }
 }
 
-const history = createMemoryHistory({
-  initialEntries: ["/"],
-});
+// const history = createMemoryHistory({
+//   initialEntries: ["/"],
+// });
+const history = createHashHistory();
 export const router = createRouter({ routeTree: rootTree, history: history });

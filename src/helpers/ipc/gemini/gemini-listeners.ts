@@ -1,19 +1,32 @@
 import { ipcMain } from "electron";
 import { GEMINI_SUBMIT_MESSAGE_CHANNEL, GEMINI_INITIALIZE_SESSION_CHANNEL } from "./gemini-channels";
 import { GoogleGenAI, Modality } from '@google/genai';
-import { promiseHooks } from "v8";
-import { C, M } from "vitest/dist/chunks/reporters.d.BFLkQcL6.js";
+import { join } from "path";
+import {setLightValuesFunctionDeclaration} from "./gemini-functions"
 
 
 let currentSession: any = null;
 let responseQueue: any[] = [];
 let isSessionActive = false;
 
-const apiKey = "";
+const apiKey = process.env.GOOGLE_API_KEY || "";
 const systemPrompt = "";
 const model = 'gemini-live-2.5-flash-preview';
+
+// Validate API key
+if (!apiKey) {
+  console.error('GOOGLE_API_KEY environment variable is not set');
+}
+
+
+const tools = [{
+  googleSearch: {},
+  functionDeclarations: [setLightValuesFunctionDeclaration]
+}]
+
 let sessionConfig = {
   responseModalities: [Modality.TEXT],
+  tools: tools,
   systemInstruction: {
     parts: [{text: systemPrompt}]
   }
@@ -41,12 +54,15 @@ async function handleTurn() {
     turns.push(message);
     if (message.serverContent && message.serverContent.turnComplete){
       done = true;
+    } else if (message.toolCall){
+      done = true;
     }
   }
   return turns;
 }
 
 async function createSession() {
+    debugger; // Execution will pause here when DevTools is open
     const ai = new GoogleGenAI({apiKey: apiKey});
     currentSession = await ai.live.connect({
         model: model,
@@ -99,6 +115,10 @@ export function addGeminiEventListeners() {
           currentSession.sendClientContent({ turns: message });
           const turns = await handleTurn()
 
+          debugger;
+          console.log('🐛 DEBUG: turns received:', turns);
+          console.log('🐛 DEBUG: turns length:', turns.length);
+          
           let final_string = ""
           
           for (const turn of turns){
@@ -109,8 +129,17 @@ export function addGeminiEventListeners() {
                 if (part.text){
                 final_string += part.text;
                 }
+                else if (part.executableCode){
+                  console.debug('executable Code: %s \n', part.executableCode.code);
+                }
+                else if (part.codeExecutionResult){
+                  console.debug('codeExecutionResult: %s', part.codeExecutionResult.output);
+                }
               }
             }
           }
+          
+          console.log('🐛 DEBUG: final_string result:', final_string);
+          console.log('🐛 DEBUG: final_string length:', final_string.length);
           return final_string});
 }

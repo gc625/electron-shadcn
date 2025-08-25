@@ -1,0 +1,49 @@
+  {
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Electron Main Process",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "start:debug"],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
+            "restart": true,
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "timeout": 30000
+        },
+        {
+            "name": "Attach to Main Process",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "restart": true,
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "name": "Debug Electron Renderer Process",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "webRoot": "${workspaceFolder}/src",
+            "timeout": 30000
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug Electron (Main + Renderer)",
+            "configurations": [
+                "Debug Electron Main Process",
+                "Debug Electron Renderer Process"
+            ]
+        }
+    ]
+}

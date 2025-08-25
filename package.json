@@ -8,6 +8,7 @@
   "scripts": {
     "start:fresh": "rimraf \"%APPDATA%\\electron-shadcn\" && npm start",
     "start": "electron-forge start",
+    "start:debug": "set NODE_ENV=development && electron-forge start -- --inspect=9229 --remote-debugging-port=9222 --remote-allow-origins=*",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
@@ -44,6 +45,7 @@
     "@types/node": "^22.17.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "cross-env": "^10.0.0",
     "electron": "^37.2.5",
     "electron-devtools-installer": "^4.0.0",
     "electron-playwright-helpers": "^1.7.1",
@@ -83,6 +85,7 @@
     "bufferutil": "^4.0.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.1",
     "electron-squirrel-startup": "^1.0.1",
     "framer-motion": "^11.18.2",
     "i18next": "^25.3.2",

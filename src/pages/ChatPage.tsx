@@ -1,5 +1,5 @@
 "use client"
-import React from "react";
+import React, { useEffect } from "react";
 import ToggleTheme from "@/components/ToggleTheme";
 import { useTranslation } from "react-i18next";
 import LangToggle from "@/components/LangToggle";
@@ -21,6 +21,15 @@ export default function ChatPage() {
   const [messages, setMessages] = React.useState<any[]>([])
   const [input, setInput] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
+
+  useEffect(() => {
+    window.overlayAPI.create();
+    
+    return () => {
+      window.overlayAPI.destroy();
+    };
+  }, []);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value)
