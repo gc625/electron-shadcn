@@ -48,27 +48,44 @@ export default function ChatPage() {
     setMessages(prev => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
-
-
-    const ai_answer = await window.gemini.submit(userMessage.content)
+    
+    const aiMessageId = (Date.now() + 1).toString()
     const aiMessage = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant" as const,
-      content: ai_answer
-      // content: `This is a mock response to: "${userMessage.content}". In a real implementation, this would connect to an AI service.`,
+      id: aiMessageId,
+      role: "assistant",
+      content: ""
     }
-    setMessages(prev => [...prev, aiMessage])
+    
+    setMessages(prev => [...prev, aiMessage]);
+
+    const handleResponseChunk = (chunk: string) => {
+      setMessages(
+        prev => 
+          prev.map(msg =>
+            msg.id === aiMessageId 
+              ? {...msg, content: msg.content + chunk}
+              : msg
+          )
+      )
+    }
+
+    const handleResponseComplete = () => {
+      setIsLoading(false)
+      window.gemini.removeAllListeners()
+    }
+    
+    window.gemini.onResponseChunk(handleResponseChunk)
+    window.gemini.onResponseComplete(handleResponseComplete)
+
+    try {
+      await window.gemini.submit(userMessage.content)
+
+   } catch (error){
+    console.error('Error submitting message:', error)
     setIsLoading(false)
-    // Mock AI response
-    // setTimeout(() => {
-    //   const aiMessage = {
-    //     id: (Date.now() + 1).toString(),
-    //     role: "assistant" as const,
-    //     content: `This is a mock response to: "${userMessage.content}". In a real implementation, this would connect to an AI service.`,
-    //   }
-    //   setMessages(prev => [...prev, aiMessage])
-    //   setIsLoading(false)
-    // }, 100)
+    window.gemini.removeAllListeners()
+   }
+
   }
 
   const append = (message: { role: "user"; content: string }) => {

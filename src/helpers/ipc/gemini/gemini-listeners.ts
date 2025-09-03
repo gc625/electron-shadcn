@@ -2,7 +2,9 @@ import { ipcMain } from "electron";
 import { GEMINI_SUBMIT_MESSAGE_CHANNEL, GEMINI_INITIALIZE_SESSION_CHANNEL } from "./gemini-channels";
 import { GoogleGenAI, Modality } from '@google/genai';
 import { join } from "path";
-import {setLightValuesFunctionDeclaration} from "./gemini-functions"
+import {drawRectangle, drawRectangleFunctionDeclaration, setLightValuesFunctionDeclaration} from "./gemini-functions"
+import { measureMemory } from "vm";
+import { handleServerContent, handleToolCalls, handleTurnComplete } from "./gemini-message-handlers";
 
 
 let currentSession: any = null;
@@ -21,7 +23,9 @@ if (!apiKey) {
 
 const tools = [{
   googleSearch: {},
-  functionDeclarations: [setLightValuesFunctionDeclaration]
+  functionDeclarations: [setLightValuesFunctionDeclaration,
+    drawRectangleFunctionDeclaration
+  ],
 }]
 
 let sessionConfig = {
@@ -31,36 +35,24 @@ let sessionConfig = {
     parts: [{text: systemPrompt}]
   }
 }
-async function waitMessage(){
-    let done = false;
-    let message = undefined;
-    while (!done){
-      message = responseQueue.shift();
-      if (message){
-        done = true;
-      } else {
-        await new Promise((resolve) => setTimeout(resolve,100));
-      }
-    }
-    return message;
 
-}
 
-async function handleTurn() {
-  const turns = [];
-  let done = false;
-  while (!done){
-    const message = await waitMessage();
-    turns.push(message);
-    if (message.serverContent && message.serverContent.turnComplete){
-      done = true;
-    } else if (message.toolCall){
-      done = true;
-    }
+
+let messageBuffer = "";
+let isFinished = false;
+
+async function processMessage(message){
+  if (message.serverContent?.modelTurn?.parts){
+    await handleServerContent(message, messageBuffer);
   }
-  return turns;
+  if (message.toolCall){
+    await handleToolCalls(message.toolCall, currentSession);
+  }
+  if (message.serverContent?.turnComplete){
+    handleTurnComplete();
+  } 
+  
 }
-
 async function createSession() {
     debugger; // Execution will pause here when DevTools is open
     const ai = new GoogleGenAI({apiKey: apiKey});
@@ -72,9 +64,7 @@ async function createSession() {
                 isSessionActive = true;
             },
             onmessage: function (msg) {
-                console.debug("recieved msg")
-                console.debug(msg);
-                responseQueue.push(msg);
+                processMessage(msg);
             },
             onerror: function (e) {
                 console.debug('Error:', e.message);
@@ -111,35 +101,9 @@ export function addGeminiEventListeners() {
           if (!currentSession || !isSessionActive) {
             await createSession();
           }
-          console.debug("sending content to gemini: ",message);
           currentSession.sendClientContent({ turns: message });
-          const turns = await handleTurn()
 
-          debugger;
-          console.log('🐛 DEBUG: turns received:', turns);
-          console.log('🐛 DEBUG: turns length:', turns.length);
-          
-          let final_string = ""
-          
-          for (const turn of turns){
-            console.debug(turn);
-            if (turn.serverContent?.modelTurn?.parts){
-              for (const part of turn.serverContent.modelTurn.parts){
-                console.debug("part: ", part)
-                if (part.text){
-                final_string += part.text;
-                }
-                else if (part.executableCode){
-                  console.debug('executable Code: %s \n', part.executableCode.code);
-                }
-                else if (part.codeExecutionResult){
-                  console.debug('codeExecutionResult: %s', part.codeExecutionResult.output);
-                }
-              }
-            }
-          }
-          
-          console.log('🐛 DEBUG: final_string result:', final_string);
-          console.log('🐛 DEBUG: final_string length:', final_string.length);
-          return final_string});
+        return "ok";
+         
+          });
 }

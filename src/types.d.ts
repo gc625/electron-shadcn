@@ -20,6 +20,7 @@ interface ElectronWindow {
 
 interface GeminiContext {
   submit: (message: string) => Promise<string>;
+  // onResponseChunk: (message: string) 
 }
 
 
